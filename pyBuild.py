@@ -1,15 +1,22 @@
 ###############################################################################################################
-#  Kompiles executables for both 32 & 64 bit windows, from a python script.                                            #
-#                                                                                                             #
+#  Kompiles executables for both 32 & 64 bit windows,  from a python script                                   #
 #  The different versions of python [32 & 64 bit] need to be set up in the python launcher                    #
 #  and are hard coded, for the moment.                                                                        #
 #                                                                                                             #
-#  Usage: pyBuild.py [-h] source                                                                                #
+#  usage: pyBuild.py [-h] [-s SOURCE] [-v] [-l]                                                               #
 #                                                                                                             #
-#  October 2019                Kevin Scott                                                                    #
+#   A Python Script Compiler.                                                                                 #
 #                                                                                                             #
-#   V1.00   01 Oct.2019   All seems to be working.                                                            #
-#   V1.01   16 Oct.2019   Added command line arguments and docstrings.                                        #
+#   optional arguments:                                                                                       #
+#     -h, --help            show this help message and exit                                                   #
+#     -s SOURCE, --source SOURCE                                                                              #
+#                           Name of the Source File to be kompiled [without .py extension].                   #
+#     -v, --version         show program's version number and exit                                            #
+#     -l, --license         Print the Software License.                                                       #
+#                                                                                                             #
+#   Kevin Scott (C) 2019                                                                                      #
+#                                                                                                             #
+#                                                                                                             #
 ###############################################################################################################
 #    Copyright (C) <2019>  <Kevin Scott>                                                                      #
 #                                                                                                             #
@@ -110,24 +117,61 @@ def Kompile(sourceFile):
 
 
 
+def printShortLicense():
+    print("""
+PyBackup {}   Copyright (C) 2019  Kevin Scott
+This program comes with ABSOLUTELY NO WARRANTY; for details type `pyBuild -l''.
+This is free software, and you are welcome to redistribute it under certain conditions.
+    """.format(__version__), flush=True)
+
+
+
+def printLongLicense():
+    print("""
+    Copyright (C) 2019  kevin Scott
+
+    This program is free software: you can redistribute it and/or modify it 
+    under the terms of the GNU General Public License as published by   
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    """, end="")
+
+
 if __name__ == "__main__":
     start_time = time.time()
 
     parser = argparse.ArgumentParser(description="A Python Script Compiler.", epilog = " Kevin Scott (C) 2019")
-    #  Add a Positional Argument.
-    #  a optional argument would be --source or -s
-    parser.add_argument("source", type=str, help="Name of the Source File to be kompiled [without .py extension].")
-    parser.add_argument("-v", "--version",   action="version", version="%(prog)s {}".format(__version__))
+    parser.add_argument("-s", "--source",   action="store", default="", help="Name of the Source File to be kompiled [without .py extension].")
+    parser.add_argument("-v", "--version",  action="version", version="%(prog)s {}".format(__version__))
+    parser.add_argument("-l", "--license",  action="store_true", help="Print the Software License.")
     args   = parser.parse_args()
 
-    sourceFile = args.source
+    if args.license:
+        printLongLicense()
+        exit(0)
+
+    if args.source == "":
+        print()
+        parser.print_help()
+        exit(1)
+    else:
+        sourceFile = args.source
 
     if os.path.exists(sourceFile + ".py"):
+        printShortLicense()
         print("Compiling " + sourceFile)
         Kompile(sourceFile)
     else:
         print("File not found")
-        print("Run pyBuild.py --help for usage")
+        parser.print_help()
         exit(2)
 
     print()

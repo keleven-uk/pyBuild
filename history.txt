@@ -1,0 +1,16 @@
+commit e1e03dbe65fe573fa101edcd54df23f1e62a1aad
+Author: keleven-uk <github@keleven.co.uk>
+Date:   Mon Nov 18 22:45:06 2019 +0000
+
+    First commit to git of pyBackup.
+    
+    V1.00  01 Oct.2019  All seems to be working.  Basic structure
+    completed.
+    V1.01  16 Oct.2019  Added command line arguments and docstrings.
+
+ .gitignore  | 132 +++++++++++++++++
+ LICENSE     | 479 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ README.md   |  25 ++++
+ _version.py |   1 +
+ pyBuild.py  | 136 +++++++++++++++++
+ 5 files changed, 773 insertions(+)
