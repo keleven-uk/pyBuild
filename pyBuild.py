@@ -1,5 +1,6 @@
 ###############################################################################################################
-#  Kompiles executables for both 32 & 64 bit windows,  from a python script                                   #
+#  Kompiles executables for both 32 & 64 bit windows, from a python script                                   # 
+#  Should be run in the same directory as the python script.                                                  #
 #  The different versions of python [32 & 64 bit] need to be set up in the python launcher                    #
 #  and are hard coded, for the moment.                                                                        #
 #                                                                                                             #
@@ -34,11 +35,12 @@
 ###############################################################################################################
 
 
-import os
 import time
+import pathlib
 import datetime
-import subprocess, shlex
+import textwrap
 import argparse
+import subprocess, shlex
 from _version import __version__
 
 PY_32 = "py -3.7-32 -m PyInstaller "                  #  call pyinstaller in 32 bit mode.
@@ -62,14 +64,12 @@ def compile32(source_file, exec_file, ex32_file):
 
     """
     #  Compile 32 bit.
-    command = PY_32 + source_file + ARGS
+    command = PY_32 + source_file.name + ARGS
     call_params = shlex.split(command)
     subprocess.run(call_params)
 
     #  rename .exe for 32 bit.
-    if os.path.exists(ex32_file): os.remove(ex32_file)   #  delete file first, else rename complains       
-    if os.path.exists(exec_file): os.rename(exec_file, ex32_file)
-
+    if exec_file.exists(): exec_file.replace(ex32_file)
 
 def compile64(source_file, exec_file, ex64_file):
     """  Kompiles the 64 bit executable.
@@ -87,13 +87,12 @@ def compile64(source_file, exec_file, ex64_file):
 
     """
     #  Compile 64 bit.
-    command = PY_64 + source_file + ARGS
+    command = PY_64 + source_file.name + ARGS
     call_params = shlex.split(command)
     subprocess.run(call_params)
 
     #  rename .exe for 64 bit.
-    if os.path.exists(ex64_file): os.remove(ex64_file)   #  delete file first, else rename complains       
-    if os.path.exists(exec_file): os.rename(exec_file, ex64_file)
+    if exec_file.exists(): exec_file.replace(ex64_file)
 
 
 def Kompile(sourceFile):
@@ -107,11 +106,11 @@ def Kompile(sourceFile):
 
     """
 
-    source_file = "./" + sourceFile + ".py"         #  slash other way ;-)
-    exec_file   = "dist\\" + sourceFile + ".exe"
-    ex32_file   = "dist\\" + sourceFile + "_32.exe"
-    ex64_file   = "dist\\" + sourceFile + "_64.exe"
-    
+    source_file = pathlib.Path.cwd().joinpath(sourceFile)
+    exec_file   = pathlib.Path.cwd().joinpath("dist", source_file.stem + ".exe")
+    ex32_file   = pathlib.Path.cwd().joinpath("dist", source_file.stem + "_32.exe")
+    ex64_file   = pathlib.Path.cwd().joinpath("dist", source_file.stem + "_64.exe")
+
     compile32(source_file, exec_file, ex32_file)
     compile64(source_file, exec_file, ex64_file)
 
@@ -148,8 +147,18 @@ def printLongLicense():
 if __name__ == "__main__":
     start_time = time.time()
 
-    parser = argparse.ArgumentParser(description="A Python Script Compiler.", epilog = " Kevin Scott (C) 2019")
-    parser.add_argument("-s", "--source",   action="store", default="", help="Name of the Source File to be kompiled [without .py extension].")
+    parser = argparse.ArgumentParser(
+        formatter_class = argparse.RawTextHelpFormatter,
+        description=textwrap.dedent("""\
+        A Python Script Compiler.
+        -----------------------
+        Kompiles executables for both 32 & 64 bit windows, from a python script.
+        Should be run in the same directory as the python script.
+        The different versions of python [32 & 64 bit] need to be set up in 
+        the python launcher and are hard coded, for the moment."""),
+        epilog = " Kevin Scott (C) 2019")
+
+    parser.add_argument("-s", "--source",   type=pathlib.Path, action="store", default="", help="Name of the Source File to be kompiled.")
     parser.add_argument("-v", "--version",  action="version", version="%(prog)s {}".format(__version__))
     parser.add_argument("-l", "--license",  action="store_true", help="Print the Software License.")
     args   = parser.parse_args()
@@ -161,16 +170,16 @@ if __name__ == "__main__":
     if args.source == "":
         print()
         parser.print_help()
-        exit(1)
+        parser.exit(1)
     else:
         sourceFile = args.source
 
-    if os.path.exists(sourceFile + ".py"):
+    if sourceFile.exists():
         printShortLicense()
-        print("Compiling " + sourceFile)
+        print("Compiling {}".format(sourceFile.name))
         Kompile(sourceFile)
     else:
-        print("File not found")
+        print("File not found :: {}".format(sourceFile.name))
         parser.print_help()
         exit(2)
 
