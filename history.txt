@@ -1,27 +1,26 @@
+    V1.04
+    
+    Added colorama, so print to the console can be in colour - i.e. errors can be in red.
+    Changed hard wire to point to Python 3.8.
+    Added argument for GUI, if given compile with noconsole.  If this argument is absent, then compile with a console.
+    The script didn't work when no arguments and no source where given - fixed.
+    
     V1.03
 
     Changed all paths to use pathlib.
-    Improved the ouput of the --help argument.
-
-
-commit 9c3a979231a60df977ea0922da141ece323b8b6d
-Author: keleven-uk <github@keleven.co.uk>
-Date:   Wed Nov 20 21:17:48 2019 +0000
+    Improved the output of the --help argument.
 
     V1.02
     
-    Amended all the argumenst to be optional, problems with mixing optional
-    and positional.  Amended logic to check if required argumenst where
+    Amended all the arguments to be optional, problems with mixing optional
+    and positional.  Amended logic to check if required arguments where
     indeed there.
 
     Added history.txt
 
-commit e1e03dbe65fe573fa101edcd54df23f1e62a1aad
-Author: keleven-uk <github@keleven.co.uk>
-Date:   Mon Nov 18 22:45:06 2019 +0000
-
     First commit to git of pyBackup.
-    
+
+    V1.01  16 Oct.2019  Added command line arguments and docstrings.    
     V1.00  01 Oct.2019  All seems to be working.  Basic structure completed.
-    V1.01  16 Oct.2019  Added command line arguments and docstrings.
+
 

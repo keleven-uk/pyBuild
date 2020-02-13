@@ -11,15 +11,18 @@
 #   optional arguments:                                                                                       #
 #     -h, --help            show this help message and exit                                                   #
 #     -s SOURCE, --source SOURCE                                                                              #
-#                           Name of the Source File to be kompiled [without .py extension].                   #
+#                           Name of the Source File to be kompiled.                                           #
+#     -g, --gui             Does this script have a GUI, else a console script.                               #
 #     -v, --version         show program's version number and exit                                            #
 #     -l, --license         Print the Software License.                                                       #
 #                                                                                                             #
-#   Kevin Scott (C) 2019                                                                                      #
+#  NB : Needs pyinstaller, colorama, not in the Python Standard Library                                       #
+#                                                                                                             #
+#   Kevin Scott (C) 2019 - 2020                                                                               #
 #                                                                                                             #
 #                                                                                                             #
 ###############################################################################################################
-#    Copyright (C) <2019>  <Kevin Scott>                                                                      #
+#    Copyright (C) <2019 - 2020>  <Kevin Scott>                                                               #
 #                                                                                                             #
 #    This program is free software: you can redistribute it and/or modify it under the terms of the           #
 #    GNU General Public License as published by the Free Software Foundation, either version 3 of the         #`
@@ -41,11 +44,11 @@ import datetime
 import textwrap
 import argparse
 import subprocess, shlex
+import colorama
 from _version import __version__
 
-PY_32 = "py -3.7-32 -m PyInstaller "                  #  call pyinstaller in 32 bit mode.
-PY_64 = "py -3.7-64 -m PyInstaller "                  #  call pyinstaller in 64 bit mode.
-ARGS  = " --onefile --noconsole --log-level ERROR"    #  arguments for pyinstaller.
+PY_32 = "py -3.8-32 -m PyInstaller "                  #  call pyinstaller in 32 bit mode.
+PY_64 = "py -3.8-64 -m PyInstaller "                  #  call pyinstaller in 64 bit mode.
 
 
 def compile32(source_file, exec_file, ex32_file):
@@ -63,6 +66,7 @@ def compile32(source_file, exec_file, ex32_file):
     none
 
     """
+
     #  Compile 32 bit.
     command = PY_32 + source_file.name + ARGS
     call_params = shlex.split(command)
@@ -86,6 +90,7 @@ def compile64(source_file, exec_file, ex64_file):
     none
 
     """
+    
     #  Compile 64 bit.
     command = PY_64 + source_file.name + ARGS
     call_params = shlex.split(command)
@@ -127,7 +132,7 @@ This is free software, and you are welcome to redistribute it under certain cond
 
 def printLongLicense():
     print("""
-    Copyright (C) 2019  kevin Scott
+    Copyright (C) 2019  Kevin Scott
 
     This program is free software: you can redistribute it and/or modify it 
     under the terms of the GNU General Public License as published by   
@@ -145,6 +150,8 @@ def printLongLicense():
 
 
 if __name__ == "__main__":
+    colorama.init()
+    
     start_time = time.time()
 
     parser = argparse.ArgumentParser(
@@ -158,32 +165,41 @@ if __name__ == "__main__":
         the python launcher and are hard coded, for the moment."""),
         epilog = " Kevin Scott (C) 2019")
 
-    parser.add_argument("-s", "--source",   type=pathlib.Path, action="store", default="", help="Name of the Source File to be kompiled.")
+    parser.add_argument("-s", "--source",   type=pathlib.Path, action="store", default=False, help="Name of the Source File to be kompiled.")
+    parser.add_argument("-g", "--gui",  action="store_false", help="Does this script have a GUI, else a console script.")
     parser.add_argument("-v", "--version",  action="version", version="%(prog)s {}".format(__version__))
     parser.add_argument("-l", "--license",  action="store_true", help="Print the Software License.")
     args   = parser.parse_args()
 
     if args.license:
         printLongLicense()
-        exit(0)
+        parser.exit(0)
 
-    if args.source == "":
-        print()
+    if not args.source:
         parser.print_help()
         parser.exit(1)
     else:
         sourceFile = args.source
+        
+    # if the script is a command line program, needs a console window.
+    # if the script is a gui, the console can be dispense with.        
 
     if sourceFile.exists():
         printShortLicense()
-        print("Compiling {}".format(sourceFile.name))
+        if args.gui:
+            ARGS  = " --onefile --log-level ERROR"    #  arguments for pyinstaller. 
+            print(f"{colorama.Fore.GREEN} Compiling a Console script {sourceFile.name} {colorama.Fore.RESET}")    
+        else:
+            ARGS  = " --onefile --noconsole --log-level ERROR"    #  arguments for pyinstaller.    
+            print(f"{colorama.Fore.GREEN} Compiling a GUI script {sourceFile.name} {colorama.Fore.RESET}")
+        
         Kompile(sourceFile)
     else:
-        print("File not found :: {}".format(sourceFile.name))
+        print(f"{colorama.Fore.RED} File not found :: {sourceFile.name} {colorama.Fore.RESET}")
         parser.print_help()
         exit(2)
 
     print()
     elapsed_time_secs = time.time() - start_time
-    print("Completed %s" % datetime.timedelta(seconds = elapsed_time_secs))
+    print(f"{colorama.Fore.CYAN} Completed {datetime.timedelta(seconds = elapsed_time_secs)} {colorama.Fore.RESET}")
     print()
